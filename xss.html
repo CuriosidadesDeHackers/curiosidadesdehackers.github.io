@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta property="og:title" content="Selector Payloads XSS Por Elementos">
+    <meta property="og:description" content="Herramienta interactiva que permite seleccionar payloads XSS por evento (onClick, onError, etc.) y etiqueta (img, script, etc.) para pruebas de seguridad.">
+    <meta property="og:image" content="https://curiosidadesdehackers.com/wp-content/uploads/2025/04/2023-07-07_18-07-278x300.png">
+    <meta property="og:url" content="https://poc.curiosidadesdehackers.com/xss.html">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Selector Payloads XSS Por Elementos">
+    <meta name="twitter:description" content="Herramienta interactiva que permite seleccionar payloads XSS por evento (onClick, onError, etc.) y etiqueta (img, script, etc.) para pruebas de seguridad.">
+    <meta name="twitter:image" content="https://curiosidadesdehackers.com/wp-content/uploads/2025/04/2023-07-07_18-07-278x300.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selector Payloads XSS Por Elementos</title>
+    <link rel="icon" href="https://curiosidadesdehackers.com/wp-content/uploads/2024/05/2023-07-07_18-07-removebg-preview-1-244x300.png" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #2d3037;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #009ee1;
+            border-radius: 10px;
+            background-color: #1e2127;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .header h1 {
+            margin: 0;
+            flex: 1;
+        }
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .filters select, .filters input {
+            flex: 1 1 200px;
+            padding: 10px;
+            border: 1px solid #009ee1;
+            border-radius: 5px;
+            box-sizing: border-box;
+            background-color: #fff;
+            color: #000;
+        }
+        .result {
+            margin-top: 20px;
+        }
+        .category {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #009ee1;
+            border-radius: 10px;
+            background-color: #fff;
+            color: #000;
+        }
+        .category h2 {
+            margin-bottom: 10px;
+            color: #000;
+        }
+        .category ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .category li {
+            margin-bottom: 5px;
+        }
+        .category li pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        #social-media {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        #social-media h3 {
+            margin: 0;
+            color: #fff;
+            font-size: 16px;
+            display: none;
+        }
+        .social-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .social-buttons a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            font-size: 14px;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        .social-buttons a.fa-globe { background-color: #4CAF50; }
+        .social-buttons a.fa-youtube { background-color: #FF0000; }
+        .social-buttons a.fa-telegram { background-color: #0088cc; }
+        .social-buttons a.fa-x-twitter { background-color: #000000; }
+        .social-buttons a.fa-linkedin { background-color: #0077b5; }
+        .social-buttons a.fa-instagram {
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+        }
+        .social-buttons a.fa-github { background-color: #333; }
+        .social-buttons a.fa-tiktok { background-color: #000; }
+        .social-buttons a:hover {
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filters select, .filters input {
+                flex: 1 1 100%;
+            }
+            .social-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            .social-buttons a {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+        }
+        /* Estilos para el footer */
+        footer {
+            width: 100%;
+            text-align: center;
+            padding: 15px 0;
+            margin-top: 20px;
+            color: #fff;
+            font-size: clamp(12px, 2vw, 14px);
+            border-top: 1px solid #009ee1;
+            position: fixed;
+            bottom: 0;
+            background-color: #2d3037;
+        }
+        /* Estilo para el botón de Ko-fi */
+        .kofi-button {
+            position: fixed;
+            bottom: 80px; /* Ajustado para que no se superponga con el footer */
+            left: 20px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Selector Payloads XSS Por Elementos</h1>
+            <section id="social-media">
+                <div class="social-buttons">
+                    <a href="https://www.curiosidadesdehackers.com" target="_blank" class="fas fa-globe" title="Sitio Web"></a>
+                    <a href="https://www.youtube.com/channel/UCyFq3OKciq3VMNpTmzV1XTA" target="_blank" class="fab fa-youtube" title="YouTube"></a>
+                    <a href="https://t.me/CuriosidadesDeHackers" target="_blank" class="fab fa-telegram" title="Telegram"></a>
+                    <a href="https://twitter.com/HackersCuriosos" target="_blank" class="fab fa-x-twitter" title="X (Twitter)"></a>
+                    <a href="https://es.linkedin.com/in/manuel-mart%C3%ADnez-curiosidades-de-hackers-55b245289" target="_blank" class="fab fa-linkedin" title="LinkedIn"></a>
+                    <a href="https://www.instagram.com/curiosidadesdehackers/" target="_blank" class="fab fa-instagram" title="Instagram"></a>
+                    <a href="https://github.com/CuriosidadesDeHackers" target="_blank" class="fab fa-github" title="GitHub"></a>
+                    <a href="https://www.tiktok.com/@curiosidadesdehackers" target="_blank" class="fab fa-tiktok" title="TikTok"></a>
+                </div>
+            </section>
+        </div>
+        <div class="filters">
+            <select id="eventSelector">
+                <option value="">Selecciona un Evento</option>
+                <!-- Las opciones se generarán dinámicamente -->
+            </select>
+            <select id="tagSelector">
+                <option value="">Selecciona un Tag</option>
+                <!-- Las opciones se generarán dinámicamente -->
+            </select>
+            <input type="text" id="searchInput" placeholder="Buscar...">
+        </div>
+        <div class="result" id="result"></div>
+    </div>
+    <!-- Botón flotante de Ko-fi -->
+    <div class="kofi-button">
+        <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+        <script type='text/javascript'>kofiwidget2.init('¿Me apoyas?', '#009ee1', 'O4O3W3IIA');kofiwidget2.draw();</script>
+    </div>
+    <footer>
+        <p>© CuriosidadesDeHackers 2025.</p>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const eventSelector = document.getElementById('eventSelector');
+            const tagSelector = document.getElementById('tagSelector');
+            const searchInput = document.getElementById('searchInput');
+            const resultDiv = document.getElementById('result');
+
+            // Cargar los payloads desde el archivo de texto plano
+            fetch('payloads.txt')
+                .then(response => response.text())
+                .then(data => {
+                    // Dividir el contenido del archivo en líneas
+                    const lines = data.split('\n');
+                    const payloads = {};
+
+                    lines.forEach(line => {
+                        if (line.trim()) {
+                            // Extraer el evento y el payload
+                            const eventMatch = line.match(/on([a-zA-Z]+)=/);
+                            const tagMatch = line.match(/<([a-zA-Z]+)/);
+                            if (eventMatch && tagMatch) {
+                                const event = eventMatch[1];
+                                const tag = tagMatch[1];
+                                if (!payloads[event]) {
+                                    payloads[event] = {};
+                                }
+                                if (!payloads[event][tag]) {
+                                    payloads[event][tag] = [];
+                                }
+                                payloads[event][tag].push(line.trim());
+                            }
+                        }
+                    });
+
+                    const events = Object.keys(payloads);
+                    const tagsSet = new Set();
+
+                    // Llenar el selector de eventos
+                    events.forEach(event => {
+                        const option = document.createElement('option');
+                        option.value = event;
+                        option.textContent = event;
+                        eventSelector.appendChild(option);
+                    });
+
+                    // Recopilar todos los tags disponibles
+                    events.forEach(event => {
+                        Object.keys(payloads[event]).forEach(tag => {
+                            tagsSet.add(tag);
+                        });
+                    });
+
+                    // Llenar el selector de tags
+                    tagsSet.forEach(tag => {
+                        const option = document.createElement('option');
+                        option.value = tag;
+                        option.textContent = tag;
+                        tagSelector.appendChild(option);
+                    });
+
+                    // Manejar la selección de eventos y tags
+                    eventSelector.addEventListener('change', updatePayloads);
+                    tagSelector.addEventListener('change', updatePayloads);
+                    searchInput.addEventListener('input', updatePayloads);
+
+                    function updatePayloads() {
+                        const selectedEvent = eventSelector.value;
+                        const selectedTag = tagSelector.value;
+                        const searchQuery = searchInput.value.toLowerCase();
+                        resultDiv.innerHTML = '';
+
+                        let filteredPayloads = {};
+
+                        // Filtrar por evento seleccionado
+                        if (selectedEvent) {
+                            filteredPayloads[selectedEvent] = payloads[selectedEvent];
+                        } else {
+                            filteredPayloads = { ...payloads };
+                        }
+
+                        // Filtrar por tag seleccionado
+                        if (selectedTag) {
+                            Object.keys(filteredPayloads).forEach(event => {
+                                if (!filteredPayloads[event][selectedTag]) {
+                                    delete filteredPayloads[event];
+                                }
+                            });
+                        }
+
+                        // Filtrar por búsqueda
+                        if (searchQuery) {
+                            Object.keys(filteredPayloads).forEach(event => {
+                                Object.keys(filteredPayloads[event]).forEach(tag => {
+                                    filteredPayloads[event][tag] = filteredPayloads[event][tag].filter(payload =>
+                                        payload.toLowerCase().includes(searchQuery)
+                                    );
+                                });
+                            });
+                        }
+
+                        // Mostrar los payloads filtrados
+                        Object.keys(filteredPayloads).forEach(event => {
+                            Object.keys(filteredPayloads[event]).forEach(tag => {
+                                const categoryDiv = document.createElement('div');
+                                categoryDiv.className = 'category';
+                                categoryDiv.innerHTML = `<h2>${tag}</h2><ul></ul>`;
+                                const ul = categoryDiv.querySelector('ul');
+
+                                filteredPayloads[event][tag].forEach(payload => {
+                                    const li = document.createElement('li');
+                                    const pre = document.createElement('pre');
+                                    pre.textContent = payload;
+                                    li.appendChild(pre);
+                                    ul.appendChild(li);
+                                });
+
+                                resultDiv.appendChild(categoryDiv);
+                            });
+                        });
+                    }
+                })
+                .catch(error => console.error('Error cargando los payloads:', error));
+        });
+    </script>
+</body>
+</html>
