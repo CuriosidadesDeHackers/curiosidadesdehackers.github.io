@@ -2,8 +2,6 @@
   <img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi5.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' />
 </a>
 
-## 🔍 Google Dorking Tool
-
 [![Sitio Web](https://img.shields.io/badge/Sitio_Web-009ee1?style=for-the-badge&logo=Firefox&logoColor=white)](https://www.curiosidadesdehackers.com)
 [![YouTube](https://img.shields.io/badge/Youtube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/channel/UCyFq3OKciq3VMNpTmzV1XTA)
 [![Telegram](https://img.shields.io/badge/Telegram-0088cc?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/CuriosidadesDeHackers)
