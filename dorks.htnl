@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta property="og:title" content="Selector de Dorks">
+    <meta property="og:description" content="Selector de Dorks es una herramienta web interactiva que permite generar automáticamente búsquedas avanzadas en Google (*Google Dorks*) basadas en un dominio específico.">
+    <meta property="og:image" content="https://curiosidadesdehackers.com/wp-content/uploads/2025/04/2023-07-07_18-07-278x300.png">
+    <meta property="og:url" content="https://poc.curiosidadesdehackers.com/xss.html">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Selector de Dorks">
+    <meta name="twitter:description" content="Selector de Dorks es una herramienta web interactiva que permite generar automáticamente búsquedas avanzadas en Google (*Google Dorks*) basadas en un dominio específico.">
+    <meta name="twitter:image" content="https://curiosidadesdehackers.com/wp-content/uploads/2025/04/2023-07-07_18-07-278x300.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selector de Dorks</title>
+    <link rel="icon" href="https://curiosidadesdehackers.com/wp-content/uploads/2024/05/2023-07-07_18-07-removebg-preview-1-244x300.png" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #2d3037;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            width: calc(100% - 10px);
+            max-width: calc(100% - 10px);
+            margin: 5px;
+            padding: 20px;
+            border: 1px solid #009ee1;
+            border-radius: 10px;
+            background-color: #7A7A7A;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #009ee1;
+            border-radius: 5px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #009ee1;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #007bb8;
+        }
+        .result {
+            margin-top: 20px;
+        }
+        .category {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #009ee1;
+            border-radius: 10px;
+            background-color: #fff;
+            color: #000;
+        }
+        .category h2 {
+            margin-bottom: 10px;
+            color: #000;
+        }
+        .category ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .category li {
+            margin-bottom: 5px;
+        }
+        .category li a {
+            color: #000;
+            text-decoration: none;
+        }
+        .category li a:hover {
+            text-decoration: underline;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            color: #c7c700;
+        }
+        #social-media {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .social-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .social-buttons a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            font-size: 14px;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        .social-buttons a.fa-globe { background-color: #4CAF50; }
+        .social-buttons a.fa-youtube { background-color: #FF0000; }
+        .social-buttons a.fa-telegram { background-color: #0088cc; }
+        .social-buttons a.fa-x-twitter { background-color: #000000; }
+        .social-buttons a.fa-linkedin { background-color: #0077b5; }
+        .social-buttons a.fa-instagram {
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+        }
+        .social-buttons a.fa-github { background-color: #333; }
+        .social-buttons a.fa-tiktok { background-color: #000; }
+        .social-buttons a:hover {
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        @media (max-width: 768px) {
+            .social-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            .social-buttons a {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+        }
+        /* Estilos para el footer */
+        footer {
+            width: 100%;
+            text-align: center;
+            padding: 15px 0;
+            margin-top: 20px;
+            color: #fff;
+            font-size: clamp(12px, 2vw, 14px);
+            border-top: 1px solid #009ee1;
+            position: fixed;
+            bottom: 0;
+            background-color: #2d3037;
+        }
+        /* Estilo para el botón de Ko-fi */
+        .kofi-button {
+            position: fixed;
+            bottom: 80px; /* Ajustado para que no se superponga con el footer */
+            left: 20px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Selector de Dorks</h1>
+            <section id="social-media">
+                <div class="social-buttons">
+                    <a href="https://www.curiosidadesdehackers.com" target="_blank" class="fas fa-globe" title="Sitio Web"></a>
+                    <a href="https://www.youtube.com/channel/UCyFq3OKciq3VMNpTmzV1XTA" target="_blank" class="fab fa-youtube" title="YouTube"></a>
+                    <a href="https://t.me/CuriosidadesDeHackers" target="_blank" class="fab fa-telegram" title="Telegram"></a>
+                    <a href="https://twitter.com/HackersCuriosos" target="_blank" class="fab fa-x-twitter" title="X (Twitter)"></a>
+                    <a href="https://es.linkedin.com/in/manuel-mart%C3%ADnez-curiosidades-de-hackers-55b245289" target="_blank" class="fab fa-linkedin" title="LinkedIn"></a>
+                    <a href="https://www.instagram.com/curiosidadesdehackers/" target="_blank" class="fab fa-instagram" title="Instagram"></a>
+                    <a href="https://github.com/CuriosidadesDeHackers" target="_blank" class="fab fa-github" title="GitHub"></a>
+                    <a href="https://www.tiktok.com/@curiosidadesdehackers" target="_blank" class="fab fa-tiktok" title="TikTok"></a>
+                </div>
+            </section>
+        </div>
+        <form id="domainForm">
+            <label for="domain">Dominio:</label>
+            <input type="text" id="domain" name="domain" placeholder="Ejemplo: ejemplo.com" required>
+            <button type="submit">Enviar</button>
+        </form>
+        <div id="result" class="result"></div>
+    </div>
+    <!-- Botón flotante de Ko-fi -->
+    <div class="kofi-button">
+        <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+        <script type='text/javascript'>kofiwidget2.init('¿Me apoyas?', '#009ee1', 'O4O3W3IIA');kofiwidget2.draw();</script>
+    </div>
+    <footer>
+        <p>© CuriosidadesDeHackers 2025.</p>
+    </footer>
+    <script>
+        const dorks = [
+            {
+                title: "🔎 Encontrar Subdominios",
+                queries: [
+                    "site:{domain} -www",
+                    "site:*.{domain}",
+                    "inurl:{domain} -www"
+                ]
+            },
+            {
+                title: "📄 Documentos Sensibles",
+                queries: [
+                    "site:{domain} filetype:pdf OR filetype:xls OR filetype:doc",
+                    "site:{domain} filetype:ppt OR filetype:txt OR filetype:csv",
+                    "site:{domain} intext:'confidential' OR intext:'internal use only'",
+                    "intitle:\"index.of\" \"parent directory\" \"size\" \"last modified\" \"description\" I Put A Spell On You (mp4|mp3|avi|flac|aac|ogg) -inurl:(jsp|php|html|aspx|htm|cf|shtml|lyrics-realm|mp3-collection) -site:.info",
+                    "intitle:\"index.of\" \"parent directory\" \"size\" \"last modified\" \"description\" Microsoft (pdf|txt|epub|doc|docx) -inurl:(jsp|php|html|aspx|htm|cf|shtml|ebooks|ebook) -site:.info"
+                ]
+            },
+            {
+                title: "💾 Bases de Datos",
+                queries: [
+                    "site:{domain} filetype:sql OR filetype:db OR filetype:sqlite",
+                    "site:{domain} inurl:phpmyadmin OR inurl:dbadmin",
+                    "site:{domain} intext:'MySQL dump' OR intext:'PostgreSQL backup'",
+                    "site:{domain} filetype:sql inurl:backup",
+                    "site:{domain} filetype:sql inurl:dump",
+                    "site:{domain} inurl:phpmyadmin OR inurl:adminer OR inurl:mysqladmin",
+                    "site:{domain} inurl:dbexport OR inurl:db-backup",
+                    "site:{domain} intext:'-- MySQL dump' OR intext:'-- PostgreSQL backup'",
+                    "site:{domain} inurl:'.sql' intext:'-- Created by mysqldump'",
+                    "site:{domain} intext:'Database dump' OR intext:'Database backup' OR intext:'DB dump'",
+                    "site:{domain} inurl:'.bak' OR inurl:'.sql.bak' OR inurl:'.db.bak'",
+                    "site:{domain} filetype:sql inurl:'/admin/'",
+                    "site:{domain} inurl:'.sql' AND intext:'Dump file'",
+                    "site:{domain} inurl:'.zip' intext:'Database backup' OR intext:'DB dump'",
+                    "site:{domain} inurl:'backup' intext:'database' OR intext:'DB' OR intext:'dump'",
+                    "site:{domain} filetype:sql inurl:'dump' AND intext:'password' OR intext:'username'",
+                    "site:{domain} inurl:'~user' AND intext:'database dump' OR intext:'sql backup'",
+                    "site:{domain} inurl:'.tar' intext:'database backup' OR intext:'database dump'",
+                    "ext:mdb inurl:*.mdb inurl:fpdb shop.mdb",
+                    "filetype:sql \"insert into\" (pass|passwd|password)",
+                    "filetype:sql (\"values * MD5\" | \"values * password\" | \"values * encrypt\")",
+                    "filetype:sql +\"IDENTIFIED BY\" -cvs",
+                    "filetype:sql password",
+                    "filetype:sql “insert into” (pass|passwd|password)",
+                    "filetype:mdb inurl:users.mdb",
+                    "filetype:ora ora",
+                    "filetype:ora tnsnames"
+                ]
+            },
+            {
+                title: "🔄 Open Redirect",
+                queries: [
+                    "site:{domain} inurl:redir",
+                    "site:{domain} inurl:url=",
+                    "site:{domain} inurl:return=",
+                    "site:{domain} inurl:r=",
+                    "site:{domain} inurl:q=",
+                    "site:{domain} inurl=redirect",
+                    "site:{domain} inurl=/out?",
+                    "site:{domain} inurl=/external?",
+                    "site:{domain} inurl=next=",
+                    "site:{domain} inurl=callback=",
+                    "site:{domain} inurl=goto=",
+                    "site:{domain} inurl=forward=",
+                    "site:{domain} inurl=to=",
+                    "site:{domain} inurl=continue=",
+                    "site:{domain} inurl=/cgi-bin/redirect.cgi?"
+                ]
+            },
+            {
+                title: "🛑 Logs y Errores",
+                queries: [
+                    "site:{domain} filetype:log",
+                    "site:{domain} 'error_log'",
+                    "site:{domain} intext:'PHP Fatal error'",
+                    "site:{domain} intext:'Exception' OR intext:'Traceback'",
+                    "site:{domain} intext:'server.log' OR intext:'access.log'",
+                    "site:{domain} filetype:txt intext:'error' OR intext:'log'",
+                    "site:{domain} inurl:/logs/ OR inurl:/log/",
+                    "site:{domain} intext:'failed password' OR intext:'authentication failed'",
+                    "site:{domain} intext:'SQL syntax error' OR intext:'database error'",
+                    "site:{domain} intext:'stack trace' OR intext:'uncaught exception'",
+                    "ext:log \"Software: Microsoft Internet Information Services *.*\"",
+                    "ext:log \"Software: Microsoft Internet Information",
+                    "ext:log \"Software: Microsoft Internet Information Services *.*\"",
+                    "filetype:log inurl:\"password.log\"",
+                    "filetype:log username putty PUTTY SSH client logs can reveal usernames",
+                    "filetype:log “PHP Parse error” | “PHP Warning” | “PHP Error”"
+                ]
+            },
+            {
+                title: "🔑 Claves API y Credenciales",
+                queries: [
+                    "site:{domain} intext:'API_KEY' OR intext:'TOKEN'",
+                    "site:{domain} filetype:json intext:'password'",
+                    "site:{domain} filetype:env intext:'DB_PASSWORD' OR intext:'AWS_SECRET_ACCESS_KEY'",
+                    "site:{domain} filetype:xml intext:'apikey'",
+                    "site:{domain} filetype:yaml intext:'API_SECRET'",
+                    "site:{domain} filetype:ini intext:'password'",
+                    "site:{domain} filetype:config intext:'secret'",
+                    "site:{domain} filetype:txt intext:'api_key'",
+                    "site:github.com {domain} intext:'token'",
+                    "site:gitlab.com {domain} intext:'PRIVATE_KEY'",
+                    "site:bitbucket.org {domain} intext:'ACCESS_TOKEN'",
+                    "site:pastebin.com {domain} intext:'API_KEY'",
+                    "site:{domain} inurl:'.git'",
+                    "filetype:config inurl:web.config inurl:ftp",
+                    "ext:(doc | pdf | xls | txt | ps | rtf | odt | sxw | psw | ppt | pps | xml) (intext:confidential salary | intext:\"budget approved\") inurl:confidential",
+                    "ext:inc \"pwd=\" \"UID=\"",
+                    "ext:ini intext:env.ini",
+                    "ext:ini Version=... password",
+                    "ext:ini Version=4.0.0.4 password",
+                    "ext:ini eudora.ini",
+                    "ext:ini intext:env.ini",
+                    "filetype:inc dbconn",
+                    "filetype:inc intext:mysql_connect",
+                    "filetype:inc mysql_connect OR mysql_pconnect",
+                    "filetype:pass pass intext:userid",
+                    "filetype:pem intext:private",
+                    "filetype:properties inurl:db intext:password",
+                    "filetype:pwl pwl",
+                    "filetype:reg reg +intext:\"defaultusername\" +intext:\"defaultpassword\"",
+                    "filetype:reg reg +intext:â? WINVNC3â?",
+                    "filetype:reg reg HKEY_CURRENT_USER SSHHOSTKEYS",
+                    "filetype:sql \"insert into\" (pass|passwd|password)",
+                    "filetype:sql (\"values * MD5\" | \"values * password\" | \"values * encrypt\")",
+                    "filetype:sql +\"IDENTIFIED BY\" -cvs",
+                    "filetype:sql password",
+                    "filetype:sql “insert into” (pass|passwd|password)",
+                    "filetype:mdb inurl:users.mdb",
+                    "filetype:ora ora",
+                    "filetype:ora tnsnames"
+                ]
+            }
+        ];
+
+        document.getElementById('domainForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const domain = document.getElementById('domain').value;
+            displayQueries(domain);
+        });
+
+        function displayQueries(domain) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '';
+
+            dorks.forEach(category => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'category';
+
+                const title = document.createElement('h2');
+                title.innerText = category.title;
+                categoryDiv.appendChild(title);
+
+                const ul = document.createElement('ul');
+                category.queries.forEach(query => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<a href="https://www.google.com/search?q=${encodeURIComponent(query.replace('{domain}', domain))}" target="_blank">${query.replace('{domain}', domain)}</a>`;
+                    ul.appendChild(li);
+                });
+                categoryDiv.appendChild(ul);
+                resultDiv.appendChild(categoryDiv);
+            });
+        }
+    </script>
+</body>
+</html>
