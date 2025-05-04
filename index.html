@@ -1,0 +1,676 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta property="og:title" content="Generador CSRF POC Avanzado">
+    <meta property="og:description" content="Este proyecto es una herramienta web diseñada para generar pruebas de concepto (PoC) de ataques CSRF (Cross-Site Request Forgery) a partir de una petición HTTP completa. Es útil para investigadores de seguridad.">
+    <meta property="og:image" content="https://curiosidadesdehackers.com/wp-content/uploads/2025/04/2023-07-07_18-07-278x300.png">
+    <meta property="og:url" content="https://csrf.curiosidadesdehackers.com/">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Generador CSRF POC Avanzado">
+    <meta name="twitter:description" content="Este proyecto es una herramienta web diseñada para generar pruebas de concepto (PoC) de ataques CSRF (Cross-Site Request Forgery) a partir de una petición HTTP completa. Es útil para investigadores de seguridad.">
+    <meta name="twitter:image" content="https://curiosidadesdehackers.com/wp-content/uploads/2025/04/2023-07-07_18-07-278x300.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador CSRF POC Avanzado</title>
+    <link rel="icon" href="https://curiosidadesdehackers.com/wp-content/uploads/2024/05/2023-07-07_18-07-removebg-preview-1-244x300.png" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #2d3037;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .main-container {
+            width: calc(100% - 40px);
+            max-width: 1200px;
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #009ee1;
+            border-radius: 10px;
+            background-color: #7A7A7A;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+        }
+        h1 {
+            color: #ffe600;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: clamp(24px, 4vw, 32px);
+        }
+        .download-button {
+            display: block;
+            margin: 20px auto;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 5px;
+            background-color: #009ee1;
+            color: white;
+            cursor: pointer;
+            font-size: clamp(16px, 2vw, 18px);
+            transition: background-color 0.3s;
+            text-decoration: none;
+            text-align: center;
+        }
+        .download-button:hover {
+            background-color: #007bb8;
+        }
+        h2 {
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: clamp(18px, 3vw, 24px);
+        }
+        .description {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #fff;
+            font-size: clamp(14px, 2vw, 16px);
+        }
+        .input-container {
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #009ee1;
+            border-radius: 5px;
+            background-color: #fff;
+            color: #000;
+            box-sizing: border-box;
+            min-height: 200px;
+            font-family: monospace;
+            font-size: clamp(12px, 2vw, 14px);
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #009ee1;
+            color: white;
+            cursor: pointer;
+            font-size: clamp(14px, 2vw, 16px);
+            flex: 1;
+            min-width: 120px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #007bb8;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: -1px;
+            overflow-x: auto;
+            scrollbar-width: none; /* Firefox */
+        }
+        .tabs::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+        .tab {
+            padding: 10px 20px;
+            background-color: #5a5a5a;
+            border: 1px solid #009ee1;
+            cursor: pointer;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            color: #fff;
+            white-space: nowrap;
+            font-size: clamp(12px, 2vw, 14px);
+        }
+        .tab.active {
+            background-color: #7A7A7A;
+            border-bottom: 1px solid #7A7A7A;
+        }
+        .tab-content {
+            display: none;
+            border: 1px solid #009ee1;
+            padding: 20px;
+            border-radius: 0 0 5px 5px;
+            background-color: #7A7A7A;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .output-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .copy-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background-color: #009ee1;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 6px 8px;
+        cursor: pointer;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        transition: all 0.2s ease;
+        z-index: 10;
+        min-width: auto;
+    }
+
+    .copy-btn:hover {
+        background-color: #007bb8;
+        transform: none; /* Eliminamos el efecto en móviles */
+    }
+
+    .copy-btn.copied {
+        background-color: #4CAF50;
+        padding: 6px 8px; /* Mantenemos el mismo padding */
+    }
+
+    .copy-btn i {
+        font-size: 12px;
+    }
+
+    .copy-btn .copy-text {
+        display: none; /* Ocultamos el texto en móviles por defecto */
+    }
+
+    /* Versión para tablets */
+    @media (min-width: 481px) {
+        .copy-btn {
+            padding: 6px 10px;
+            font-size: 13px;
+        }
+        .copy-btn i {
+            font-size: 14px;
+        }
+    }
+
+    /* Versión para escritorio */
+    @media (min-width: 769px) {
+        .copy-btn {
+            top: 10px;
+            right: 10px;
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 5px;
+        }
+        .copy-btn i {
+            font-size: 16px;
+        }
+        .copy-btn .copy-text {
+            display: inline; /* Mostramos el texto en desktop */
+        }
+        .copy-btn:hover {
+            transform: translateY(-2px); /* Solo efecto hover en desktop */
+        }
+    }
+
+    /* Ajuste extra para pantallas muy pequeñas */
+    @media (max-width: 360px) {
+        .copy-btn {
+            padding: 5px;
+            font-size: 11px;
+        }
+        .copy-btn i {
+            font-size: 11px;
+        }
+    }
+        .output-label {
+            display: block;
+            margin-bottom: 5px;
+            color: #fff;
+            font-size: clamp(14px, 2vw, 16px);
+        }
+        .generated-by {
+            text-align: center;
+            margin-top: 20px;
+            color: #fff;
+            font-style: italic;
+            font-size: clamp(12px, 2vw, 14px);
+        }
+
+        /* Estilos mejorados para redes sociales */
+        #social-media {
+            text-align: center;
+            margin: 30px 0 20px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        #social-media h3 {
+            margin-bottom: 15px;
+            color: #fff;
+            font-size: clamp(16px, 3vw, 22px);
+        }
+
+        .social-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 0 10px;
+            max-width: 100%;
+        }
+
+        .social-buttons a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        /* Tamaños responsivos para botones sociales */
+        @media (min-width: 480px) {
+            .social-buttons a {
+                width: 44px;
+                height: 44px;
+                font-size: 20px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .social-buttons a {
+                width: 48px;
+                height: 48px;
+                font-size: 22px;
+            }
+        }
+
+        /* Colores específicos para cada red social */
+        .social-buttons a.fa-globe { background-color: #4CAF50; }
+        .social-buttons a.fa-youtube { background-color: #FF0000; }
+        .social-buttons a.fa-telegram { background-color: #0088cc; }
+        .social-buttons a.fa-x-twitter { background-color: #000000; }
+        .social-buttons a.fa-linkedin { background-color: #0077b5; }
+        .social-buttons a.fa-instagram {
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+        }
+        .social-buttons a.fa-github { background-color: #333; }
+        .social-buttons a.fa-tiktok { background-color: #000; }
+
+        /* Efecto hover */
+        .social-buttons a:hover {
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Ajustes para pantallas muy pequeñas */
+        @media (max-width: 360px) {
+            .social-buttons {
+                gap: 8px;
+            }
+            .social-buttons a {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+            }
+        }
+
+        /* Estilos para el footer */
+        footer {
+            width: 100%;
+            text-align: center;
+            padding: 15px 0;
+            margin-top: 20px;
+            color: #fff;
+            font-size: clamp(12px, 2vw, 14px);
+            border-top: 1px solid #009ee1;
+        }
+
+        /* Estilo para el botón de Ko-fi */
+        .kofi-button {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            .button-group {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+            }
+            .kofi-button {
+                position: fixed;
+                margin-top: 20px;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-container {
+                margin: 10px;
+                padding: 15px;
+                width: calc(100% - 20px);
+            }
+            .tab {
+                padding: 8px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <h1>Generador CSRF POC Avanzado</h1>
+        <p class="description">Pega una petición HTTP completa y genera automáticamente un POC CSRF en diferentes formatos.</p>
+
+        <div class="input-container">
+            <label class="output-label" for="http-request">Petición HTTP Completa:</label>
+            <textarea id="http-request" placeholder="POST /path HTTP/1.1
+Host: example.com
+Content-Type: application/x-www-form-urlencoded
+
+param1=value1&param2=value2"></textarea>
+
+            <div class="button-group">
+                <button onclick="parseRequest()">Generar POC CSRF</button>
+                <button onclick="document.getElementById('http-request').value = ''">Limpiar</button>
+                <button onclick="loadSampleRequest()">Cargar Ejemplo</button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="openTab('html-poc')">HTML POC</div>
+            <div class="tab" onclick="openTab('curl-poc')">cURL POC</div>
+            <div class="tab" onclick="openTab('js-poc')">JavaScript POC</div>
+        </div>
+
+        <div id="html-poc" class="tab-content active">
+            <div class="output-container">
+                <button class="copy-btn" onclick="copyToClipboard('html-output')">
+                    <i class="far fa-copy"></i> <span class="copy-text">Copiar</span>
+                </button>
+                <label class="output-label" for="html-output">POC HTML:</label>
+                <textarea id="html-output" rows="15" readonly></textarea>
+            </div>
+            <div class="generated-by">Generado por CSRF PoC de Curiosidades De Hackers</div>
+        </div>
+
+        <div id="curl-poc" class="tab-content">
+            <div class="output-container">
+                <button class="copy-btn" onclick="copyToClipboard('curl-output')">
+                    <i class="far fa-copy"></i> <span class="copy-text">Copiar</span>
+                </button>
+                <label class="output-label" for="curl-output">POC cURL:</label>
+                <textarea id="curl-output" rows="15" readonly></textarea>
+            </div>
+            <div class="generated-by">Generado por CSRF PoC de Curiosidades De Hackers</div>
+        </div>
+
+        <div id="js-poc" class="tab-content">
+            <div class="output-container">
+                <button class="copy-btn" onclick="copyToClipboard('js-output')">
+                    <i class="far fa-copy"></i> <span class="copy-text">Copiar</span>
+                </button>
+                <label class="output-label" for="js-output">POC JavaScript:</label>
+                <textarea id="js-output" rows="15" readonly></textarea>
+            </div>
+            <div class="generated-by">Generado por CSRF PoC de Curiosidades De Hackers</div>
+        </div>
+
+        <a href="https://github.com/CuriosidadesDeHackers/CSRF-PoC-Generator-Avanzado---Burp-Suite-Extension.git" class="download-button">Descargar Plugin para Burpsuite</a>
+
+        <section id="social-media">
+            <h3>Puedes seguirme en:</h3>
+            <div class="social-buttons">
+                <a href="https://www.curiosidadesdehackers.com" target="_blank" class="fas fa-globe" title="Sitio Web"></a>
+                <a href="https://www.youtube.com/channel/UCyFq3OKciq3VMNpTmzV1XTA" target="_blank" class="fab fa-youtube" title="YouTube"></a>
+                <a href="https://t.me/CuriosidadesDeHackers" target="_blank" class="fab fa-telegram" title="Telegram"></a>
+                <a href="https://twitter.com/HackersCuriosos" target="_blank" class="fab fa-x-twitter" title="X (Twitter)"></a>
+                <a href="https://es.linkedin.com/in/manuel-mart%C3%ADnez-curiosidades-de-hackers-55b245289" target="_blank" class="fab fa-linkedin" title="LinkedIn"></a>
+                <a href="https://www.instagram.com/curiosidadesdehackers/" target="_blank" class="fab fa-instagram" title="Instagram"></a>
+                <a href="https://github.com/CuriosidadesDeHackers" target="_blank" class="fab fa-github" title="GitHub"></a>
+                <a href="https://www.tiktok.com/@curiosidadesdehackers" target="_blank" class="fab fa-tiktok" title="TikTok"></a>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-4 text-start">
+                    <p> © CuriosidadesDeHackers 2025.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Botón flotante de Ko-fi -->
+    <div class="kofi-button">
+        <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+        <script type='text/javascript'>kofiwidget2.init('¿Me apoyas?', '#009ee1', 'O4O3W3IIA');kofiwidget2.draw();</script>
+    </div>
+
+    <script>
+        function openTab(tabId) {
+            // Oculta todos los contenidos de pestañas
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Desactiva todas las pestañas
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Activa la pestaña y contenido seleccionados
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        function copyToClipboard(elementId) {
+        const textarea = document.getElementById(elementId);
+        textarea.select();
+        document.execCommand('copy');
+
+        // Feedback visual optimizado para móviles
+        const copyBtn = document.querySelector(`button[onclick="copyToClipboard('${elementId}')"]`);
+        if (copyBtn) {
+            const icon = copyBtn.querySelector('i');
+
+            // Cambiar a estado "copiado"
+            copyBtn.classList.add('copied');
+            icon.className = 'fas fa-check';
+
+            // Cambiar temporalmente el texto si está visible
+            const textSpan = copyBtn.querySelector('.copy-text');
+            if (textSpan && textSpan.style.display !== 'none') {
+                const originalText = textSpan.textContent;
+                textSpan.textContent = 'Copiado!';
+            }
+
+            // Restaurar después de 1.5 segundos (más rápido que antes)
+            setTimeout(() => {
+                copyBtn.classList.remove('copied');
+                icon.className = 'far fa-copy';
+                if (textSpan) {
+                    textSpan.textContent = 'Copiar';
+                }
+            }, 1500);
+        }
+    }
+
+        function loadSampleRequest() {
+            const sampleRequest = `POST /index.com HTTP/1.1
+Host: ejemplo.com
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:137.0) Gecko/20100101 Firefox/137.0
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 138
+
+subname=&subemail=test%40gmail.com&subscribe.x=ssssssss&subscribe.y=3&mlist=ensnc%26%2395804%3B%3ACanoga+%3Csvg+onload%3Dconfirm%281%29%3E`;
+
+            document.getElementById('http-request').value = sampleRequest;
+        }
+
+        function parseRequest() {
+            const requestText = document.getElementById('http-request').value.trim();
+            if (!requestText) {
+                alert('Por favor ingresa una petición HTTP');
+                return;
+            }
+
+            try {
+                const lines = requestText.split('\n');
+                const firstLine = lines[0].trim();
+                const method = firstLine.split(' ')[0];
+                let path = firstLine.split(' ')[1];
+                const hostLine = lines.find(line => line.toLowerCase().startsWith('host:'));
+                const host = hostLine ? hostLine.split(':')[1].trim() : '';
+
+                // Encontrar el cuerpo de la petición
+                let body = '';
+                let emptyLineIndex = lines.findIndex(line => line.trim() === '');
+                if (emptyLineIndex !== -1 && emptyLineIndex < lines.length - 1) {
+                    body = lines.slice(emptyLineIndex + 1).join('\n');
+                }
+
+                // Construir URL completa
+                const protocol = 'https://'; // Forzar HTTPS para evitar mixed content
+                const fullUrl = protocol + host + path;
+
+                // Parsear parámetros del cuerpo con soporte para valores con `=`
+                const params = {};
+                if (body && body.includes('=')) {
+                    body.split('&').forEach(pair => {
+                        const equalIndex = pair.indexOf('=');
+                        if (equalIndex !== -1) {
+                            const key = decodeURIComponent(pair.slice(0, equalIndex));
+                            const value = decodeURIComponent(pair.slice(equalIndex + 1).replace(/\+/g, ' '));
+                            params[key] = value;
+                        } else {
+                            params[decodeURIComponent(pair)] = '';
+                        }
+                    });
+                }
+
+                // Generar PoCs
+                generateHtmlPoc(method, fullUrl, params);
+                generateCurlPoc(method, fullUrl, params, requestText);
+                generateJsPoc(method, fullUrl, params);
+
+            } catch (e) {
+                alert('Error al parsear la petición: ' + e.message);
+                console.error(e);
+            }
+        }
+
+        function generateHtmlPoc(method, url, params) {
+            let htmlPoc = `<!-- Generado por CSRF PoC de Curiosidades De Hackers -->\n`;
+            htmlPoc += `<html>\n  <body>\n    <form action="${url}" method="${method}">\n`;
+
+            for (const [key, value] of Object.entries(params)) {
+                // Escapar caracteres especiales para HTML
+                const escapedValue = value.replace(/&/g, '&amp;')
+                                       .replace(/</g, '&lt;')
+                                       .replace(/>/g, '&gt;')
+                                       .replace(/"/g, '&quot;')
+                                       .replace(/'/g, '&#39;')
+                                       .replace(/\(/g, '&#40;')   // Paréntesis izquierdo
+                                       .replace(/\)/g, '&#41;')   // Paréntesis derecho
+                                       .replace(/=/g, '&#61;')   // Igual
+                                       .replace(/\//g, '&#47;')   // Barra
+                                       .replace(/\./g, '&#46;')   // Punto
+                                       .replace(/\s/g, '&#32;'); // Espacios
+
+                htmlPoc += `      <input type="hidden" name="${key}" value="${escapedValue}" />\n`;
+            }
+
+            htmlPoc += `      <input type="submit" value="Submit request" />\n`;
+            htmlPoc += `    </form>\n`;
+            htmlPoc += `  </body>\n</html>`;
+
+            document.getElementById('html-output').value = htmlPoc;
+        }
+
+        function generateCurlPoc(method, url, params, originalRequest) {
+            let curlCommand = `# Generado por CSRF PoC de Curiosidades De Hackers\n`;
+            curlCommand += `curl -X ${method} '${url}' \\\n`;
+
+            // Extraer headers importantes de la petición original
+            const headers = {};
+            const lines = originalRequest.split('\n');
+            for (const line of lines) {
+                if (line.includes(':') && !line.toLowerCase().startsWith('host:')) {
+                    const [name, value] = line.split(':');
+                    headers[name.trim()] = value.trim();
+                }
+            }
+
+            // Añadir headers al comando curl
+            for (const [name, value] of Object.entries(headers)) {
+                curlCommand += `  -H '${name}: ${value}' \\\n`;
+            }
+
+            // Añadir cuerpo si es necesario
+            if (Object.keys(params).length > 0) {
+                const body = Object.entries(params)
+                    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+                    .join('&');
+                curlCommand += `  -d '${body}'`;
+            }
+
+            document.getElementById('curl-output').value = curlCommand;
+        }
+
+        function generateJsPoc(method, url, params) {
+            let jsPoc = `// Generado por CSRF PoC de Curiosidades De Hackers\n`;
+            jsPoc += `// POC CSRF con JavaScript\n`;
+            jsPoc += `const url = '${url}';\n\n`;
+
+            if (method.toUpperCase() === 'GET') {
+                // Para GET, añadir parámetros a la URL
+                const queryParams = Object.entries(params)
+                    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+                    .join('&');
+
+                jsPoc += `const fullUrl = url + (url.includes('?') ? '&' : '?') + '${queryParams}';\n`;
+                jsPoc += `fetch(fullUrl, {\n`;
+                jsPoc += `  method: 'GET',\n`;
+                jsPoc += `  credentials: 'include'\n`;
+                jsPoc += `}).then(response => {\n`;
+                jsPoc += `  console.log('CSRF attack completed');\n`;
+                jsPoc += `});`;
+            } else {
+                // Para POST, PUT, etc.
+                jsPoc += `const formData = new FormData();\n`;
+
+                for (const [key, value] of Object.entries(params)) {
+                    jsPoc += `formData.append('${key}', '${value.replace(/'/g, "\\'")}');\n`;
+                }
+
+                jsPoc += `\nfetch(url, {\n`;
+                jsPoc += `  method: '${method}',\n`;
+                jsPoc += `  body: formData,\n`;
+                jsPoc += `  credentials: 'include'\n`;
+                jsPoc += `}).then(response => {\n`;
+                jsPoc += `  console.log('CSRF attack completed');\n`;
+                jsPoc += `});`;
+            }
+
+            document.getElementById('js-output').value = jsPoc;
+        }
+    </script>
+</body>
+</html>
