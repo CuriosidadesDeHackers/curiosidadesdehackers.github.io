@@ -19,7 +19,7 @@ Este repositorio está diseñado exclusivamente para almacenar proyectos de prue
 
 ## 1. Selector de Payloads XSS por Elementos
 
-🌐 **Sitio Web:** [Selector de Payloads XSS](https://csrf.curiosidadesdehackers.com/xss.html)
+🌐 **Sitio Web:** [Selector de Payloads XSS](https://poc.curiosidadesdehackers.com/xss.html)
 
 📂 **Repositorio Original:** [Selector-Payloads-XSS-Por-Elementos](https://github.com/CuriosidadesDeHackers/Selector-Payloads-XSS-Por-Elementos)
 
@@ -40,7 +40,7 @@ Este proyecto es una herramienta web diseñada para generar pruebas de concepto 
 
 ## 3. Google Dorking Tool
 
-🌐 **Sitio Web:** [Google Dorking Tool](https://csrf.curiosidadesdehackers.com/dorks.html)
+🌐 **Sitio Web:** [Google Dorking Tool](https://poc.curiosidadesdehackers.com/dorks.html)
 
 📂 **Repositorio Original:** [Curiosidades-De-Hackers-Dorks](https://github.com/CuriosidadesDeHackers/Curiosidades-De-Hackers-Dorks)
 
