@@ -15,257 +15,1127 @@
     <title>Selector Payloads XSS Por Elementos</title>
     <link rel="icon" href="https://curiosidadesdehackers.com/wp-content/uploads/2024/05/2023-07-07_18-07-removebg-preview-1-244x300.png" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #009ee1;
+            --primary-hover: #007bb8;
+            --primary-light: #33b3e8;
+            --secondary-color: #ffe600;
+            --secondary-hover: #ffd700;
+            --background-dark: #0f1419;
+            --background-card: #1a1f2e;
+            --background-input: #252b3d;
+            --background-overlay: rgba(26, 31, 46, 0.95);
+            --text-primary: #ffffff;
+            --text-secondary: #b8bcc8;
+            --text-muted: #8b92a5;
+            --border-color: #2d3748;
+            --border-hover: #4a5568;
+            --success-color: #48bb78;
+            --error-color: #f56565;
+            --warning-color: #ed8936;
+            --info-color: #4299e1;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+            --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.2);
+            --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.3);
+            --shadow-glow: 0 0 20px rgba(0, 158, 225, 0.3);
+            --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, #0088cc 100%);
+            --gradient-secondary: linear-gradient(135deg, var(--secondary-color) 0%, #ffd700 100%);
+            --gradient-dark: linear-gradient(135deg, var(--background-dark) 0%, #1a1f2e 100%);
+            --gradient-card: linear-gradient(145deg, rgba(26, 31, 46, 0.8) 0%, rgba(37, 43, 61, 0.6) 100%);
+            --backdrop-blur: blur(20px);
+            --border-radius-sm: 8px;
+            --border-radius-md: 12px;
+            --border-radius-lg: 16px;
+            --border-radius-xl: 24px;
+            --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-bounce: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #2d3037;
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--gradient-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
             min-height: 100vh;
-            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
         }
-        .container {
+
+        /* Advanced Background Effects */
+        .background-effects {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            border: 1px solid #009ee1;
-            border-radius: 10px;
-            background-color: #1e2127;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            box-sizing: border-box;
+            height: 100%;
+            pointer-events: none;
+            z-index: -2;
+            overflow: hidden;
         }
+
+        .background-effects::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(0, 158, 225, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 230, 0, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 40% 60%, rgba(0, 158, 225, 0.03) 0%, transparent 50%);
+            animation: backgroundFloat 20s ease-in-out infinite;
+        }
+
+        .background-effects::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23009ee1" fill-opacity="0.02"><circle cx="30" cy="30" r="1"/></g></svg>');
+            animation: patternMove 30s linear infinite;
+        }
+
+        /* Floating particles */
+        .particle {
+            position: absolute;
+            background: var(--primary-color);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.1;
+            animation: particleFloat 15s infinite linear;
+        }
+
+        .particle:nth-child(1) { width: 4px; height: 4px; left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { width: 6px; height: 6px; left: 20%; animation-delay: 2s; }
+        .particle:nth-child(3) { width: 3px; height: 3px; left: 30%; animation-delay: 4s; }
+        .particle:nth-child(4) { width: 5px; height: 5px; left: 40%; animation-delay: 6s; }
+        .particle:nth-child(5) { width: 4px; height: 4px; left: 50%; animation-delay: 8s; }
+        .particle:nth-child(6) { width: 7px; height: 7px; left: 60%; animation-delay: 10s; }
+        .particle:nth-child(7) { width: 3px; height: 3px; left: 70%; animation-delay: 12s; }
+        .particle:nth-child(8) { width: 5px; height: 5px; left: 80%; animation-delay: 14s; }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+            min-height: calc(100vh - 120px);
+        }
+
+        /* Enhanced Header */
         .header {
+            text-align: center;
+            margin-bottom: 4rem;
+            animation: headerSlideIn 1s var(--transition-bounce);
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(0, 158, 225, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: headerGlow 3s ease-in-out infinite alternate;
+            z-index: -1;
+        }
+
+        .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
             flex-wrap: wrap;
+            gap: 2rem;
         }
+
         .header h1 {
-            margin: 0;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            background: var(--gradient-secondary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.03em;
+            position: relative;
+            display: inline-block;
             flex: 1;
-            color: #c7c700;
+            min-width: 300px;
         }
+
+        .header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            width: 60%;
+            height: 3px;
+            background: var(--gradient-primary);
+            border-radius: 2px;
+            transform: translateX(-50%) scaleX(0);
+            animation: underlineExpand 1s ease-out 0.5s forwards;
+        }
+
+        /* Professional Main Card */
+        .main-card {
+            background: var(--gradient-card);
+            border-radius: var(--border-radius-xl);
+            padding: 3rem;
+            box-shadow: 
+                var(--shadow-xl),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                0 0 0 1px rgba(255, 255, 255, 0.05);
+            backdrop-filter: var(--backdrop-blur);
+            animation: cardSlideUp 1s var(--transition-bounce) 0.3s both;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 3rem;
+        }
+
+        .main-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--gradient-primary);
+            opacity: 0.8;
+        }
+
+        .main-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 158, 225, 0.03) 0%, transparent 70%);
+            animation: cardGlow 8s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        /* Enhanced Filter Section */
+        .filters-section {
+            margin-bottom: 3rem;
+            animation: sectionFadeIn 0.8s ease-out 0.6s both;
+        }
+
         .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .filter-group {
+            position: relative;
+        }
+
+        .filter-label {
             display: flex;
-            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.01em;
+        }
+
+        .filter-label i {
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
+
+        .filter-select,
+        .filter-input {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            background: var(--background-input);
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: all var(--transition-normal);
+            outline: none;
+            appearance: none;
+        }
+
+        .filter-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23b8bcc8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 1rem center;
+            background-repeat: no-repeat;
+            background-size: 1rem;
+            padding-right: 3rem;
+        }
+
+        .filter-select:focus,
+        .filter-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 
+                0 0 0 3px rgba(0, 158, 225, 0.1),
+                var(--shadow-glow);
+            transform: translateY(-2px);
+            background: rgba(37, 43, 61, 0.8);
+        }
+
+        .filter-input::placeholder {
+            color: var(--text-muted);
+            font-style: italic;
+            opacity: 0.7;
+        }
+
+        /* Enhanced Results Section */
+        .results-section {
+            animation: sectionFadeIn 0.8s ease-out 0.9s both;
+        }
+
+        .results-header {
+            display: flex;
+            align-items: center;
             justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
         }
-        .filters select, .filters input {
-            flex: 1 1 200px;
-            padding: 10px;
-            border: 1px solid #009ee1;
-            border-radius: 5px;
-            box-sizing: border-box;
-            background-color: #fff;
-            color: #000;
+
+        .results-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
-        .result {
-            margin-top: 20px;
+
+        .results-count {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--border-radius-sm);
+            font-size: 0.8rem;
+            font-weight: 600;
         }
-        .category {
-            margin-bottom: 20px;
-            padding: 20px;
-            border: 1px solid #009ee1;
-            border-radius: 10px;
-            background-color: #fff;
-            color: #000;
+
+        .loading-indicator {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
         }
-        .category h2 {
-            margin-bottom: 10px;
-            color: #000;
+
+        .loading-indicator.show {
+            display: flex;
         }
-        .category ul {
-            list-style-type: none;
+
+        .loading-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Professional Payload Categories */
+        .payload-category {
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: var(--border-radius-lg);
+            border: 1px solid var(--border-color);
+            backdrop-filter: var(--backdrop-blur);
+            overflow: hidden;
+            transition: all var(--transition-normal);
+            animation: categorySlideIn 0.6s ease-out;
+        }
+
+        .payload-category:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-glow);
+            transform: translateY(-2px);
+        }
+
+        .category-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 1.25rem 1.75rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+        }
+
+        .category-header:hover {
+            background: linear-gradient(135deg, var(--primary-hover) 0%, #006699 100%);
+        }
+
+        .category-header i {
+            transition: transform var(--transition-normal);
+        }
+
+        .category-header.collapsed i {
+            transform: rotate(-90deg);
+        }
+
+        .category-content {
+            padding: 0;
+            max-height: 1000px;
+            overflow: hidden;
+            transition: all var(--transition-normal);
+        }
+
+        .category-content.collapsed {
+            max-height: 0;
             padding: 0;
         }
-        .category li {
-            margin-bottom: 5px;
+
+        .payload-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
         }
-        .category li pre {
-            background-color: #f4f4f4;
-            padding: 10px;
-            border-radius: 5px;
+
+        .payload-item {
+            border-bottom: 1px solid var(--border-color);
+            transition: all var(--transition-normal);
+        }
+
+        .payload-item:last-child {
+            border-bottom: none;
+        }
+
+        .payload-item:hover {
+            background: rgba(0, 158, 225, 0.05);
+        }
+
+        .payload-content {
+            padding: 1.5rem 1.75rem;
+            position: relative;
+        }
+
+        .payload-code {
+            background: var(--background-input);
+            padding: 1.25rem;
+            border-radius: var(--border-radius-sm);
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: var(--text-primary);
             overflow-x: auto;
+            border: 1px solid var(--border-color);
+            position: relative;
+            word-break: break-all;
         }
-        #social-media {
+
+        .copy-payload-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 0.4rem;
+            transition: all var(--transition-normal);
+            z-index: 10;
+            opacity: 0;
+            transform: translateY(-5px);
         }
-        #social-media h3 {
-            margin: 0;
-            color: #fff;
-            font-size: 16px;
-            display: none;
+
+        .payload-content:hover .copy-payload-btn {
+            opacity: 1;
+            transform: translateY(0);
         }
+
+        .copy-payload-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: var(--shadow-md);
+        }
+
+        .copy-payload-btn.copied {
+            background: var(--success-color);
+            animation: copySuccess 0.6s ease-out;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        /* Professional Social Section */
+        .social-section {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            animation: socialSlideIn 0.8s ease-out 0.4s both;
+        }
+
+        .social-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
         .social-buttons {
             display: flex;
-            gap: 10px;
+            gap: 1rem;
+            flex-wrap: wrap;
         }
-        .social-buttons a {
+
+        .social-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--border-radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 30px;
-            height: 30px;
-            font-size: 14px;
-            color: #fff;
+            font-size: 1.2rem;
+            color: white;
             text-decoration: none;
-            border-radius: 50%;
-            transition: all 0.3s ease;
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transform: translateY(0);
         }
-        .social-buttons a.fa-globe { background-color: #4CAF50; }
-        .social-buttons a.fa-youtube { background-color: #FF0000; }
-        .social-buttons a.fa-telegram { background-color: #0088cc; }
-        .social-buttons a.fa-x-twitter { background-color: #000000; }
-        .social-buttons a.fa-linkedin { background-color: #0077b5; }
-        .social-buttons a.fa-instagram {
-            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-        }
-        .social-buttons a.fa-github { background-color: #333; }
-        .social-buttons a.fa-tiktok { background-color: #000; }
-        .social-buttons a:hover {
-            transform: translateY(-3px) scale(1.1);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-            .header h1 {
-                width: 100%;
-                text-align: center;
-            }
-            #social-media {
-                width: 100%;
-                justify-content: center;
-            }
-            .social-buttons {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            .social-buttons a {
-                width: 35px;
-                height: 35px;
-                font-size: 16px;
-            }
-            .filters {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .filters select, .filters input {
-                flex: 1 1 100%;
-            }
-        }
-        /* Estilos para el footer */
-        footer {
-            width: 100%;
-            text-align: center;
-            padding: 15px 0;
-            margin-top: 20px;
-            color: #fff;
-            font-size: clamp(12px, 2vw, 14px);
-            border-top: 1px solid #009ee1;
-            position: fixed;
+
+        .social-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
             bottom: 0;
-            background-color: #2d3037;
+            background: inherit;
+            opacity: 0.8;
+            transition: opacity var(--transition-normal);
         }
-        /* Estilo para el botón de Ko-fi */
+
+        .social-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all var(--transition-normal);
+        }
+
+        .social-btn:hover {
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .social-btn:hover::before {
+            opacity: 1;
+        }
+
+        .social-btn:hover::after {
+            width: 100px;
+            height: 100px;
+        }
+
+        .social-btn:active {
+            transform: translateY(-1px) scale(1.05);
+        }
+
+        .social-btn i {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Social media colors with gradients */
+        .social-btn.website { background: linear-gradient(135deg, #4CAF50, #45a049); }
+        .social-btn.youtube { background: linear-gradient(135deg, #FF0000, #cc0000); }
+        .social-btn.telegram { background: linear-gradient(135deg, #0088cc, #006699); }
+        .social-btn.twitter { background: linear-gradient(135deg, #000000, #333333); }
+        .social-btn.linkedin { background: linear-gradient(135deg, #0077b5, #005885); }
+        .social-btn.instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+        .social-btn.github { background: linear-gradient(135deg, #333, #24292e); }
+        .social-btn.tiktok { background: linear-gradient(135deg, #000, #333); }
+
+        /* Enhanced Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 4rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            animation: fadeInUp 0.8s ease-out 1.2s both;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: var(--backdrop-blur);
+        }
+
         .kofi-button {
             position: fixed;
-            bottom: 80px; /* Ajustado para que no se superponga con el footer */
-            left: 20px;
+            bottom: 2rem;
+            left: 2rem;
             z-index: 1000;
+            transition: all var(--transition-normal);
+            animation: kofiFloat 3s ease-in-out infinite;
+        }
+
+        .kofi-button:hover {
+            transform: translateY(-3px) scale(1.05);
+        }
+
+        /* Toast System */
+        .toast {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius-md);
+            color: white;
+            font-weight: 500;
+            font-size: 0.9rem;
+            box-shadow: var(--shadow-lg);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            backdrop-filter: var(--backdrop-blur);
+            transform: translateX(100%);
+            transition: transform var(--transition-normal);
+            max-width: 350px;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast-success { background: linear-gradient(135deg, var(--success-color), #38a169); }
+        .toast-error { background: linear-gradient(135deg, var(--error-color), #e53e3e); }
+        .toast-info { background: linear-gradient(135deg, var(--info-color), #3182ce); }
+        .toast-warning { background: linear-gradient(135deg, var(--warning-color), #dd6b20); }
+
+        /* Professional Animations */
+        @keyframes backgroundFloat {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(120deg); }
+            66% { transform: translate(-20px, 20px) rotate(240deg); }
+        }
+
+        @keyframes patternMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(60px, 60px); }
+        }
+
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.1; }
+            90% { opacity: 0.1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+
+        @keyframes headerSlideIn {
+            0% { opacity: 0; transform: translateY(-50px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes headerGlow {
+            0% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        @keyframes underlineExpand {
+            0% { transform: translateX(-50%) scaleX(0); }
+            100% { transform: translateX(-50%) scaleX(1); }
+        }
+
+        @keyframes cardSlideUp {
+            0% { opacity: 0; transform: translateY(60px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes cardGlow {
+            0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) rotate(0deg); }
+            50% { opacity: 0.5; transform: translate(-50%, -50%) rotate(180deg); }
+        }
+
+        @keyframes sectionFadeIn {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes categorySlideIn {
+            0% { opacity: 0; transform: translateX(-30px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes socialSlideIn {
+            0% { opacity: 0; transform: translateX(30px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes copySuccess {
+            0% { transform: translateY(-2px) scale(1.05); }
+            50% { transform: translateY(-4px) scale(1.1); }
+            100% { transform: translateY(-2px) scale(1.05); }
+        }
+
+        @keyframes kofiFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        @keyframes fadeInUp {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        /* Enhanced Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--background-input);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--primary-color), var(--primary-hover));
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, var(--primary-hover), var(--primary-color));
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+
+            .main-card {
+                padding: 2rem;
+                border-radius: var(--border-radius-lg);
+            }
+
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .header h1 {
+                min-width: auto;
+                width: 100%;
+            }
+
+            .filters {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .social-section {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .social-buttons {
+                justify-content: center;
+            }
+
+            .social-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.1rem;
+            }
+
+            .kofi-button {
+                position: relative;
+                bottom: auto;
+                left: auto;
+                margin-top: 2rem;
+                text-align: center;
+                animation: none;
+            }
+
+            .toast {
+                top: 1rem;
+                right: 1rem;
+                left: 1rem;
+                max-width: none;
+            }
+
+            .results-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .main-card {
+                padding: 1.5rem;
+            }
+
+            .copy-payload-btn {
+                position: relative;
+                top: auto;
+                right: auto;
+                margin-top: 1rem;
+                opacity: 1;
+                transform: none;
+            }
+
+            .social-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            :root {
+                --border-color: #ffffff;
+                --text-secondary: #ffffff;
+                --text-muted: #cccccc;
+            }
+        }
+
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="background-effects">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
     <div class="container">
-        <div class="header">
-            <h1>Selector Payloads XSS Por Elementos</h1>
-            <section id="social-media">
-                <div class="social-buttons">
-                    <a href="https://www.curiosidadesdehackers.com" target="_blank" class="fas fa-globe" title="Sitio Web"></a>
-                    <a href="https://www.youtube.com/channel/UCyFq3OKciq3VMNpTmzV1XTA" target="_blank" class="fab fa-youtube" title="YouTube"></a>
-                    <a href="https://t.me/CuriosidadesDeHackers" target="_blank" class="fab fa-telegram" title="Telegram"></a>
-                    <a href="https://twitter.com/HackersCuriosos" target="_blank" class="fab fa-x-twitter" title="X (Twitter)"></a>
-                    <a href="https://es.linkedin.com/in/manuel-mart%C3%ADnez-curiosidades-de-hackers-55b245289" target="_blank" class="fab fa-linkedin" title="LinkedIn"></a>
-                    <a href="https://www.instagram.com/curiosidadesdehackers/" target="_blank" class="fab fa-instagram" title="Instagram"></a>
-                    <a href="https://github.com/CuriosidadesDeHackers" target="_blank" class="fab fa-github" title="GitHub"></a>
-                    <a href="https://www.tiktok.com/@curiosidadesdehackers" target="_blank" class="fab fa-tiktok" title="TikTok"></a>
+        <header class="header">
+            <div class="header-content">
+                <h1>Selector Payloads XSS Por Elementos</h1>
+                <section class="social-section">
+                    <span class="social-label">Sígueme:</span>
+                    <div class="social-buttons">
+                        <a href="https://www.curiosidadesdehackers.com" target="_blank" class="social-btn website" title="Sitio Web">
+                            <i class="fas fa-globe"></i>
+                        </a>
+                        <a href="https://www.youtube.com/channel/UCyFq3OKciq3VMNpTmzV1XTA" target="_blank" class="social-btn youtube" title="YouTube">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                        <a href="https://t.me/CuriosidadesDeHackers" target="_blank" class="social-btn telegram" title="Telegram">
+                            <i class="fab fa-telegram"></i>
+                        </a>
+                        <a href="https://twitter.com/HackersCuriosos" target="_blank" class="social-btn twitter" title="X (Twitter)">
+                            <i class="fab fa-x-twitter"></i>
+                        </a>
+                        <a href="https://es.linkedin.com/in/manuel-mart%C3%ADnez-curiosidades-de-hackers-55b245289" target="_blank" class="social-btn linkedin" title="LinkedIn">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                        <a href="https://www.instagram.com/curiosidadesdehackers/" target="_blank" class="social-btn instagram" title="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://github.com/CuriosidadesDeHackers" target="_blank" class="social-btn github" title="GitHub">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="https://www.tiktok.com/@curiosidadesdehackers" target="_blank" class="social-btn tiktok" title="TikTok">
+                            <i class="fab fa-tiktok"></i>
+                        </a>
+                    </div>
+                </section>
+            </div>
+        </header>
+
+        <main class="main-card">
+            <section class="filters-section">
+                <div class="filters">
+                    <div class="filter-group">
+                        <label class="filter-label" for="eventSelector">
+                            <i class="fas fa-bolt"></i> Evento
+                        </label>
+                        <select id="eventSelector" class="filter-select">
+                            <option value="">Selecciona un Evento</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label" for="tagSelector">
+                            <i class="fas fa-tag"></i> Etiqueta HTML
+                        </label>
+                        <select id="tagSelector" class="filter-select">
+                            <option value="">Selecciona una Etiqueta</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label" for="searchInput">
+                            <i class="fas fa-search"></i> Buscar
+                        </label>
+                        <input type="text" id="searchInput" class="filter-input" placeholder="Buscar en payloads...">
+                    </div>
                 </div>
             </section>
-        </div>
-        <div class="filters">
-            <select id="eventSelector">
-                <option value="">Selecciona un Evento</option>
-                <!-- Las opciones se generarán dinámicamente -->
-            </select>
-            <select id="tagSelector">
-                <option value="">Selecciona un Tag</option>
-                <!-- Las opciones se generarán dinámicamente -->
-            </select>
-            <input type="text" id="searchInput" placeholder="Buscar...">
-        </div>
-        <div class="result" id="result"></div>
+
+            <section class="results-section">
+                <div class="results-header">
+                    <h2 class="results-title">
+                        <i class="fas fa-code"></i>
+                        Payloads XSS
+                        <span class="results-count" id="resultsCount">0</span>
+                    </h2>
+                    <div class="loading-indicator" id="loadingIndicator">
+                        <div class="loading-spinner"></div>
+                        <span>Cargando payloads...</span>
+                    </div>
+                </div>
+                <div class="result" id="result">
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <h3>Selecciona filtros para ver los payloads</h3>
+                        <p>Usa los filtros de arriba para encontrar payloads XSS específicos</p>
+                    </div>
+                </div>
+            </section>
+        </main>
     </div>
-    <!-- Botón flotante de Ko-fi -->
+
+    <footer class="footer">
+        <p>© CuriosidadesDeHackers 2025. Todos los derechos reservados.</p>
+    </footer>
+
     <div class="kofi-button">
         <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
         <script type='text/javascript'>kofiwidget2.init('¿Me apoyas?', '#009ee1', 'O4O3W3IIA');kofiwidget2.draw();</script>
     </div>
-    <footer>
-        <p>© CuriosidadesDeHackers 2025.</p>
-    </footer>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const eventSelector = document.getElementById('eventSelector');
             const tagSelector = document.getElementById('tagSelector');
             const searchInput = document.getElementById('searchInput');
             const resultDiv = document.getElementById('result');
+            const resultsCount = document.getElementById('resultsCount');
+            const loadingIndicator = document.getElementById('loadingIndicator');
 
-            // Cargar los payloads desde el archivo de texto plano
+            let allPayloads = {};
+            let currentResults = 0;
+
+            // Show loading state
+            function showLoading() {
+                loadingIndicator.classList.add('show');
+            }
+
+            // Hide loading state
+            function hideLoading() {
+                loadingIndicator.classList.remove('show');
+            }
+
+            // Update results count
+            function updateResultsCount(count) {
+                currentResults = count;
+                resultsCount.textContent = count;
+                resultsCount.style.animation = 'pulse 0.3s ease-out';
+                setTimeout(() => {
+                    resultsCount.style.animation = '';
+                }, 300);
+            }
+
+            // Show toast notification
+            function showToast(message, type = 'info') {
+                const existingToasts = document.querySelectorAll('.toast');
+                existingToasts.forEach(toast => toast.remove());
+
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.innerHTML = `
+                    <i class="fas ${getToastIcon(type)}"></i>
+                    <span>${message}</span>
+                `;
+
+                document.body.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 100);
+
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                    }, 300);
+                }, 3000);
+            }
+
+            function getToastIcon(type) {
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-exclamation-circle',
+                    info: 'fa-info-circle',
+                    warning: 'fa-exclamation-triangle'
+                };
+                return icons[type] || icons.info;
+            }
+
+            // Copy payload to clipboard
+            function copyPayload(payload, button) {
+                navigator.clipboard.writeText(payload).then(() => {
+                    const icon = button.querySelector('i');
+                    const originalIconClass = icon.className;
+                    
+                    button.classList.add('copied');
+                    icon.className = 'fas fa-check';
+                    
+                    setTimeout(() => {
+                        button.classList.remove('copied');
+                        icon.className = originalIconClass;
+                    }, 2000);
+                    
+                    showToast('Payload copiado al portapapeles', 'success');
+                }).catch(() => {
+                    showToast('Error al copiar el payload', 'error');
+                });
+            }
+
+            // Toggle category collapse
+            function toggleCategory(header) {
+                const content = header.nextElementSibling;
+                const icon = header.querySelector('i');
+                
+                header.classList.toggle('collapsed');
+                content.classList.toggle('collapsed');
+                
+                if (content.classList.contains('collapsed')) {
+                    icon.style.transform = 'rotate(-90deg)';
+                } else {
+                    icon.style.transform = 'rotate(0deg)';
+                }
+            }
+
+            // Load payloads from file
+            showLoading();
             fetch('payloads.txt')
-                .then(response => response.text())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('No se pudo cargar el archivo de payloads');
+                    }
+                    return response.text();
+                })
                 .then(data => {
-                    // Dividir el contenido del archivo en líneas
+                    hideLoading();
+                    
                     const lines = data.split('\n');
-                    const payloads = {};
+                    allPayloads = {};
 
                     lines.forEach(line => {
                         if (line.trim()) {
-                            // Extraer el evento y el payload
                             const eventMatch = line.match(/on([a-zA-Z]+)=/);
                             const tagMatch = line.match(/<([a-zA-Z]+)/);
                             if (eventMatch && tagMatch) {
                                 const event = eventMatch[1];
                                 const tag = tagMatch[1];
-                                if (!payloads[event]) {
-                                    payloads[event] = {};
+                                if (!allPayloads[event]) {
+                                    allPayloads[event] = {};
                                 }
-                                if (!payloads[event][tag]) {
-                                    payloads[event][tag] = [];
+                                if (!allPayloads[event][tag]) {
+                                    allPayloads[event][tag] = [];
                                 }
-                                payloads[event][tag].push(line.trim());
+                                allPayloads[event][tag].push(line.trim());
                             }
                         }
                     });
 
-                    const events = Object.keys(payloads);
+                    const events = Object.keys(allPayloads).sort();
                     const tagsSet = new Set();
 
-                    // Llenar el selector de eventos
+                    // Populate event selector
                     events.forEach(event => {
                         const option = document.createElement('option');
                         option.value = event;
@@ -273,83 +1143,161 @@
                         eventSelector.appendChild(option);
                     });
 
-                    // Recopilar todos los tags disponibles
+                    // Collect all available tags
                     events.forEach(event => {
-                        Object.keys(payloads[event]).forEach(tag => {
+                        Object.keys(allPayloads[event]).forEach(tag => {
                             tagsSet.add(tag);
                         });
                     });
 
-                    // Llenar el selector de tags
-                    tagsSet.forEach(tag => {
+                    // Populate tag selector
+                    Array.from(tagsSet).sort().forEach(tag => {
                         const option = document.createElement('option');
                         option.value = tag;
                         option.textContent = tag;
                         tagSelector.appendChild(option);
                     });
 
-                    // Manejar la selección de eventos y tags
-                    eventSelector.addEventListener('change', updatePayloads);
-                    tagSelector.addEventListener('change', updatePayloads);
-                    searchInput.addEventListener('input', updatePayloads);
-
-                    function updatePayloads() {
-                        const selectedEvent = eventSelector.value;
-                        const selectedTag = tagSelector.value;
-                        const searchQuery = searchInput.value.toLowerCase();
-                        resultDiv.innerHTML = '';
-
-                        let filteredPayloads = {};
-
-                        // Filtrar por evento seleccionado
-                        if (selectedEvent) {
-                            filteredPayloads[selectedEvent] = payloads[selectedEvent];
-                        } else {
-                            filteredPayloads = { ...payloads };
-                        }
-
-                        // Filtrar por tag seleccionado
-                        if (selectedTag) {
-                            Object.keys(filteredPayloads).forEach(event => {
-                                if (!filteredPayloads[event][selectedTag]) {
-                                    delete filteredPayloads[event];
-                                }
-                            });
-                        }
-
-                        // Filtrar por búsqueda
-                        if (searchQuery) {
-                            Object.keys(filteredPayloads).forEach(event => {
-                                Object.keys(filteredPayloads[event]).forEach(tag => {
-                                    filteredPayloads[event][tag] = filteredPayloads[event][tag].filter(payload =>
-                                        payload.toLowerCase().includes(searchQuery)
-                                    );
-                                });
-                            });
-                        }
-
-                        // Mostrar los payloads filtrados
-                        Object.keys(filteredPayloads).forEach(event => {
-                            Object.keys(filteredPayloads[event]).forEach(tag => {
-                                const categoryDiv = document.createElement('div');
-                                categoryDiv.className = 'category';
-                                categoryDiv.innerHTML = `<h2>${tag}</h2><ul></ul>`;
-                                const ul = categoryDiv.querySelector('ul');
-
-                                filteredPayloads[event][tag].forEach(payload => {
-                                    const li = document.createElement('li');
-                                    const pre = document.createElement('pre');
-                                    pre.textContent = payload;
-                                    li.appendChild(pre);
-                                    ul.appendChild(li);
-                                });
-
-                                resultDiv.appendChild(categoryDiv);
-                            });
-                        });
-                    }
+                    showToast('Payloads cargados correctamente', 'success');
                 })
-                .catch(error => console.error('Error cargando los payloads:', error));
+                .catch(error => {
+                    hideLoading();
+                    console.error('Error loading payloads:', error);
+                    showToast('Error al cargar los payloads', 'error');
+                    
+                    resultDiv.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Error al cargar los payloads</h3>
+                            <p>No se pudo cargar el archivo payloads.txt</p>
+                        </div>
+                    `;
+                });
+
+            // Event listeners
+            eventSelector.addEventListener('change', updatePayloads);
+            tagSelector.addEventListener('change', updatePayloads);
+            searchInput.addEventListener('input', debounce(updatePayloads, 300));
+
+            // Debounce function for search
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            function updatePayloads() {
+                const selectedEvent = eventSelector.value;
+                const selectedTag = tagSelector.value;
+                const searchQuery = searchInput.value.toLowerCase();
+                
+                resultDiv.innerHTML = '';
+                let totalPayloads = 0;
+
+                let filteredPayloads = {};
+
+                // Filter by selected event
+                if (selectedEvent) {
+                    if (allPayloads[selectedEvent]) {
+                        filteredPayloads[selectedEvent] = allPayloads[selectedEvent];
+                    }
+                } else {
+                    filteredPayloads = { ...allPayloads };
+                }
+
+                // Filter by selected tag
+                if (selectedTag) {
+                    Object.keys(filteredPayloads).forEach(event => {
+                        if (!filteredPayloads[event][selectedTag]) {
+                            delete filteredPayloads[event];
+                        } else {
+                            filteredPayloads[event] = { [selectedTag]: filteredPayloads[event][selectedTag] };
+                        }
+                    });
+                }
+
+                // Filter by search query
+                if (searchQuery) {
+                    Object.keys(filteredPayloads).forEach(event => {
+                        Object.keys(filteredPayloads[event]).forEach(tag => {
+                            filteredPayloads[event][tag] = filteredPayloads[event][tag].filter(payload =>
+                                payload.toLowerCase().includes(searchQuery)
+                            );
+                            if (filteredPayloads[event][tag].length === 0) {
+                                delete filteredPayloads[event][tag];
+                            }
+                        });
+                        if (Object.keys(filteredPayloads[event]).length === 0) {
+                            delete filteredPayloads[event];
+                        }
+                    });
+                }
+
+                // Display filtered payloads
+                const hasResults = Object.keys(filteredPayloads).length > 0;
+                
+                if (!hasResults) {
+                    resultDiv.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-search"></i>
+                            <h3>No se encontraron payloads</h3>
+                            <p>Intenta ajustar los filtros de búsqueda</p>
+                        </div>
+                    `;
+                    updateResultsCount(0);
+                    return;
+                }
+
+                Object.keys(filteredPayloads).forEach(event => {
+                    Object.keys(filteredPayloads[event]).forEach(tag => {
+                        const categoryDiv = document.createElement('div');
+                        categoryDiv.className = 'payload-category';
+                        
+                        const payloadCount = filteredPayloads[event][tag].length;
+                        totalPayloads += payloadCount;
+                        
+                        categoryDiv.innerHTML = `
+                            <div class="category-header" onclick="toggleCategory(this)">
+                                <span><strong>${tag}</strong> - ${event} (${payloadCount} payloads)</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="category-content">
+                                <ul class="payload-list"></ul>
+                            </div>
+                        `;
+
+                        const ul = categoryDiv.querySelector('.payload-list');
+
+                        filteredPayloads[event][tag].forEach((payload, index) => {
+                            const li = document.createElement('li');
+                            li.className = 'payload-item';
+                            li.innerHTML = `
+                                <div class="payload-content">
+                                    <button class="copy-payload-btn" onclick="copyPayload('${payload.replace(/'/g, "\\'")}', this)">
+                                        <i class="far fa-copy"></i> Copiar
+                                    </button>
+                                    <pre class="payload-code">${payload}</pre>
+                                </div>
+                            `;
+                            ul.appendChild(li);
+                        });
+
+                        resultDiv.appendChild(categoryDiv);
+                    });
+                });
+
+                updateResultsCount(totalPayloads);
+            }
+
+            // Make functions globally available
+            window.toggleCategory = toggleCategory;
+            window.copyPayload = copyPayload;
         });
     </script>
 </body>
