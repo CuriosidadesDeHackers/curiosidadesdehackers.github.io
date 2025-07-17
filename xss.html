@@ -1000,142 +1000,38 @@
             const tagSelector = document.getElementById('tagSelector');
             const searchInput = document.getElementById('searchInput');
             const resultDiv = document.getElementById('result');
-            const resultsCount = document.getElementById('resultsCount');
-            const loadingIndicator = document.getElementById('loadingIndicator');
 
-            let allPayloads = {};
-            let currentResults = 0;
-
-            // Show loading state
-            function showLoading() {
-                loadingIndicator.classList.add('show');
-            }
-
-            // Hide loading state
-            function hideLoading() {
-                loadingIndicator.classList.remove('show');
-            }
-
-            // Update results count
-            function updateResultsCount(count) {
-                currentResults = count;
-                resultsCount.textContent = count;
-                resultsCount.style.animation = 'pulse 0.3s ease-out';
-                setTimeout(() => {
-                    resultsCount.style.animation = '';
-                }, 300);
-            }
-
-            // Show toast notification
-            function showToast(message, type = 'info') {
-                const existingToasts = document.querySelectorAll('.toast');
-                existingToasts.forEach(toast => toast.remove());
-
-                const toast = document.createElement('div');
-                toast.className = `toast toast-${type}`;
-                toast.innerHTML = `
-                    <i class="fas ${getToastIcon(type)}"></i>
-                    <span>${message}</span>
-                `;
-
-                document.body.appendChild(toast);
-
-                setTimeout(() => {
-                    toast.classList.add('show');
-                }, 100);
-
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    setTimeout(() => {
-                        if (toast.parentNode) {
-                            toast.parentNode.removeChild(toast);
-                        }
-                    }, 300);
-                }, 3000);
-            }
-
-            function getToastIcon(type) {
-                const icons = {
-                    success: 'fa-check-circle',
-                    error: 'fa-exclamation-circle',
-                    info: 'fa-info-circle',
-                    warning: 'fa-exclamation-triangle'
-                };
-                return icons[type] || icons.info;
-            }
-
-            // Copy payload to clipboard
-            function copyPayload(payload, button) {
-                navigator.clipboard.writeText(payload).then(() => {
-                    const icon = button.querySelector('i');
-                    const originalIconClass = icon.className;
-                    
-                    button.classList.add('copied');
-                    icon.className = 'fas fa-check';
-                    
-                    setTimeout(() => {
-                        button.classList.remove('copied');
-                        icon.className = originalIconClass;
-                    }, 2000);
-                    
-                    showToast('Payload copiado al portapapeles', 'success');
-                }).catch(() => {
-                    showToast('Error al copiar el payload', 'error');
-                });
-            }
-
-            // Toggle category collapse
-            function toggleCategory(header) {
-                const content = header.nextElementSibling;
-                const icon = header.querySelector('i');
-                
-                header.classList.toggle('collapsed');
-                content.classList.toggle('collapsed');
-                
-                if (content.classList.contains('collapsed')) {
-                    icon.style.transform = 'rotate(-90deg)';
-                } else {
-                    icon.style.transform = 'rotate(0deg)';
-                }
-            }
-
-            // Load payloads from file
-            showLoading();
+            // Cargar los payloads desde el archivo de texto plano
             fetch('payloads.txt')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('No se pudo cargar el archivo de payloads');
-                    }
-                    return response.text();
-                })
+                .then(response => response.text())
                 .then(data => {
-                    hideLoading();
-                    
+                    // Dividir el contenido del archivo en líneas
                     const lines = data.split('\n');
-                    allPayloads = {};
+                    const payloads = {};
 
                     lines.forEach(line => {
                         if (line.trim()) {
+                            // Extraer el evento y el payload
                             const eventMatch = line.match(/on([a-zA-Z]+)=/);
                             const tagMatch = line.match(/<([a-zA-Z]+)/);
                             if (eventMatch && tagMatch) {
                                 const event = eventMatch[1];
                                 const tag = tagMatch[1];
-                                if (!allPayloads[event]) {
-                                    allPayloads[event] = {};
+                                if (!payloads[event]) {
+                                    payloads[event] = {};
                                 }
-                                if (!allPayloads[event][tag]) {
-                                    allPayloads[event][tag] = [];
+                                if (!payloads[event][tag]) {
+                                    payloads[event][tag] = [];
                                 }
-                                allPayloads[event][tag].push(line.trim());
+                                payloads[event][tag].push(line.trim());
                             }
                         }
                     });
 
-                    const events = Object.keys(allPayloads).sort();
+                    const events = Object.keys(payloads);
                     const tagsSet = new Set();
 
-                    // Populate event selector
+                    // Llenar el selector de eventos
                     events.forEach(event => {
                         const option = document.createElement('option');
                         option.value = event;
@@ -1143,161 +1039,83 @@
                         eventSelector.appendChild(option);
                     });
 
-                    // Collect all available tags
+                    // Recopilar todos los tags disponibles
                     events.forEach(event => {
-                        Object.keys(allPayloads[event]).forEach(tag => {
+                        Object.keys(payloads[event]).forEach(tag => {
                             tagsSet.add(tag);
                         });
                     });
 
-                    // Populate tag selector
-                    Array.from(tagsSet).sort().forEach(tag => {
+                    // Llenar el selector de tags
+                    tagsSet.forEach(tag => {
                         const option = document.createElement('option');
                         option.value = tag;
                         option.textContent = tag;
                         tagSelector.appendChild(option);
                     });
 
-                    showToast('Payloads cargados correctamente', 'success');
-                })
-                .catch(error => {
-                    hideLoading();
-                    console.error('Error loading payloads:', error);
-                    showToast('Error al cargar los payloads', 'error');
-                    
-                    resultDiv.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <h3>Error al cargar los payloads</h3>
-                            <p>No se pudo cargar el archivo payloads.txt</p>
-                        </div>
-                    `;
-                });
+                    // Manejar la selección de eventos y tags
+                    eventSelector.addEventListener('change', updatePayloads);
+                    tagSelector.addEventListener('change', updatePayloads);
+                    searchInput.addEventListener('input', updatePayloads);
 
-            // Event listeners
-            eventSelector.addEventListener('change', updatePayloads);
-            tagSelector.addEventListener('change', updatePayloads);
-            searchInput.addEventListener('input', debounce(updatePayloads, 300));
+                    function updatePayloads() {
+                        const selectedEvent = eventSelector.value;
+                        const selectedTag = tagSelector.value;
+                        const searchQuery = searchInput.value.toLowerCase();
+                        resultDiv.innerHTML = '';
 
-            // Debounce function for search
-            function debounce(func, wait) {
-                let timeout;
-                return function executedFunction(...args) {
-                    const later = () => {
-                        clearTimeout(timeout);
-                        func(...args);
-                    };
-                    clearTimeout(timeout);
-                    timeout = setTimeout(later, wait);
-                };
-            }
+                        let filteredPayloads = {};
 
-            function updatePayloads() {
-                const selectedEvent = eventSelector.value;
-                const selectedTag = tagSelector.value;
-                const searchQuery = searchInput.value.toLowerCase();
-                
-                resultDiv.innerHTML = '';
-                let totalPayloads = 0;
-
-                let filteredPayloads = {};
-
-                // Filter by selected event
-                if (selectedEvent) {
-                    if (allPayloads[selectedEvent]) {
-                        filteredPayloads[selectedEvent] = allPayloads[selectedEvent];
-                    }
-                } else {
-                    filteredPayloads = { ...allPayloads };
-                }
-
-                // Filter by selected tag
-                if (selectedTag) {
-                    Object.keys(filteredPayloads).forEach(event => {
-                        if (!filteredPayloads[event][selectedTag]) {
-                            delete filteredPayloads[event];
+                        // Filtrar por evento seleccionado
+                        if (selectedEvent) {
+                            filteredPayloads[selectedEvent] = payloads[selectedEvent];
                         } else {
-                            filteredPayloads[event] = { [selectedTag]: filteredPayloads[event][selectedTag] };
+                            filteredPayloads = { ...payloads };
                         }
-                    });
-                }
 
-                // Filter by search query
-                if (searchQuery) {
-                    Object.keys(filteredPayloads).forEach(event => {
-                        Object.keys(filteredPayloads[event]).forEach(tag => {
-                            filteredPayloads[event][tag] = filteredPayloads[event][tag].filter(payload =>
-                                payload.toLowerCase().includes(searchQuery)
-                            );
-                            if (filteredPayloads[event][tag].length === 0) {
-                                delete filteredPayloads[event][tag];
-                            }
-                        });
-                        if (Object.keys(filteredPayloads[event]).length === 0) {
-                            delete filteredPayloads[event];
+                        // Filtrar por tag seleccionado
+                        if (selectedTag) {
+                            Object.keys(filteredPayloads).forEach(event => {
+                                if (!filteredPayloads[event][selectedTag]) {
+                                    delete filteredPayloads[event];
+                                }
+                            });
                         }
-                    });
-                }
 
-                // Display filtered payloads
-                const hasResults = Object.keys(filteredPayloads).length > 0;
-                
-                if (!hasResults) {
-                    resultDiv.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-search"></i>
-                            <h3>No se encontraron payloads</h3>
-                            <p>Intenta ajustar los filtros de búsqueda</p>
-                        </div>
-                    `;
-                    updateResultsCount(0);
-                    return;
-                }
+                        // Filtrar por búsqueda
+                        if (searchQuery) {
+                            Object.keys(filteredPayloads).forEach(event => {
+                                Object.keys(filteredPayloads[event]).forEach(tag => {
+                                    filteredPayloads[event][tag] = filteredPayloads[event][tag].filter(payload =>
+                                        payload.toLowerCase().includes(searchQuery)
+                                    );
+                                });
+                            });
+                        }
 
-                Object.keys(filteredPayloads).forEach(event => {
-                    Object.keys(filteredPayloads[event]).forEach(tag => {
-                        const categoryDiv = document.createElement('div');
-                        categoryDiv.className = 'payload-category';
-                        
-                        const payloadCount = filteredPayloads[event][tag].length;
-                        totalPayloads += payloadCount;
-                        
-                        categoryDiv.innerHTML = `
-                            <div class="category-header" onclick="toggleCategory(this)">
-                                <span><strong>${tag}</strong> - ${event} (${payloadCount} payloads)</span>
-                                <i class="fas fa-chevron-down"></i>
-                            </div>
-                            <div class="category-content">
-                                <ul class="payload-list"></ul>
-                            </div>
-                        `;
+                        // Mostrar los payloads filtrados
+                        Object.keys(filteredPayloads).forEach(event => {
+                            Object.keys(filteredPayloads[event]).forEach(tag => {
+                                const categoryDiv = document.createElement('div');
+                                categoryDiv.className = 'category';
+                                categoryDiv.innerHTML = `<h2>${tag}</h2><ul></ul>`;
+                                const ul = categoryDiv.querySelector('ul');
 
-                        const ul = categoryDiv.querySelector('.payload-list');
+                                filteredPayloads[event][tag].forEach(payload => {
+                                    const li = document.createElement('li');
+                                    const pre = document.createElement('pre');
+                                    pre.textContent = payload;
+                                    li.appendChild(pre);
+                                    ul.appendChild(li);
+                                });
 
-                        filteredPayloads[event][tag].forEach((payload, index) => {
-                            const li = document.createElement('li');
-                            li.className = 'payload-item';
-                            li.innerHTML = `
-                                <div class="payload-content">
-                                    <button class="copy-payload-btn" onclick="copyPayload('${payload.replace(/'/g, "\\'")}', this)">
-                                        <i class="far fa-copy"></i> Copiar
-                                    </button>
-                                    <pre class="payload-code">${payload}</pre>
-                                </div>
-                            `;
-                            ul.appendChild(li);
+                                resultDiv.appendChild(categoryDiv);
+                            });
                         });
-
-                        resultDiv.appendChild(categoryDiv);
-                    });
-                });
-
-                updateResultsCount(totalPayloads);
-            }
-
-            // Make functions globally available
-            window.toggleCategory = toggleCategory;
-            window.copyPayload = copyPayload;
+                    }
+                })
+                .catch(error => console.error('Error cargando los payloads:', error));
         });
     </script>
 </body>
